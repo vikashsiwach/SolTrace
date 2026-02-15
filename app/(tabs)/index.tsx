@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import getBalance, { getTokens, getTxns, short, timeAgo } from "../../services/methods";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 
 export default function WalletScreen() {
@@ -10,6 +12,8 @@ export default function WalletScreen() {
   const [balance, setBalance] = useState<number | null>(null);
   const [tokens, setTokens] = useState<any[]>([]);
   const [txns, setTxns] = useState<any[]>([]);
+
+  const router = useRouter();
 
   const search = async() =>{
     const trimmedAddress = address.trim();
@@ -83,10 +87,23 @@ export default function WalletScreen() {
             keyExtractor={(t) => t.mint}
             scrollEnabled={false}
             renderItem={({ item }) => (
-              <View style={s.row}>
-                <Text style={s.mint}>{short(item.mint, 6)}</Text>
-                <Text style={s.amount}>{item.amount}</Text>
-              </View>
+              <TouchableOpacity
+                style= {s.row}
+                onPress ={() =>
+                  router.push(`/token/${item.mint}?amount=${item.amount}`)
+                }
+                >
+                  <Text style={s.mint}>{short(item.mint, 6)}</Text>
+                  <View style={s.tokenRight}>
+                    <Text style={s.amount}>{item.amount}</Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color="#6B7280"
+                    />
+                  </View>
+              </TouchableOpacity>
+
             )}
           />
         </>
@@ -246,5 +263,10 @@ const s = StyleSheet.create({
     color: "#6B7280",
     fontSize: 12,
     marginTop: 4,
+  },
+  tokenRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 })
