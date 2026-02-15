@@ -158,7 +158,7 @@ const s = StyleSheet.create({
   },
   searchButton:{
     borderRadius:8,
-    backgroundColor: "#14F195",
+    backgroundColor: "#3abd3a",
     marginTop:40,
     height:60,
     alignItems: "center",
