@@ -1,11 +1,17 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+//define the shape of object
 
 interface WalletState{
 
+  //data
   favourites: string[];
   searchHistory: string[];
   isDevnet: boolean;
 
+  //actions
   addFavourite: (address:string) => void;
   removeFavourite: (address:string) => void;
   isFavourite: (address:string) => boolean;
@@ -14,8 +20,11 @@ interface WalletState{
   toggleNetwork: () => void;
 }
 
-export const useWalletStore = create<WalletState>((set,get) => ({
-
+export const useWalletStore = create<WalletState>()(
+  persist(
+    (set,get) => ({
+  
+  //initial state
   favourites: [],
   searchHistory: [],
   isDevnet: false,
@@ -47,5 +56,9 @@ export const useWalletStore = create<WalletState>((set,get) => ({
 
   toggleNetwork: () => 
     set((state) => ({isDevnet : !state.isDevnet})),
-
-}));
+  }),
+  {
+    name: "wallet-storage",
+    storage: createJSONStorage(() => AsyncStorage),
+  }
+));
