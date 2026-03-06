@@ -1,14 +1,16 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createMMKV } from "react-native-mmkv"
 
-export const asyncStorageAdaptor = {
+export const storage = createMMKV();
 
-  getItem: async (key:string) : Promise<string | null > => {
-    return AsyncStorage.getItem(key);
+export const mmkvStorage = {
+  getItem : (key:string) : string | null => {
+    const value = storage.getString(key);
+    return value ?? null ;
   },
-  setItem: async (key : string, value : string) : Promise<void> => {
-    await AsyncStorage.setItem(key, value);
+  setItem : (key: string, value: string): void => {
+    storage.set(key,value);
   },
-  removeItem: async (key : string) : Promise<void> => {
-    await AsyncStorage.removeItem(key);
+  removeItem: (key:string): void => {
+    storage.remove(key);
   },
 };
