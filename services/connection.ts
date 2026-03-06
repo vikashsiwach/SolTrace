@@ -1,6 +1,14 @@
-const RPC = "https://api.devnet.solana.com";
+import { useWalletStore } from "../src/stores/wallet-store";
+
 
 export const rpc = async (method: string, params: any[]) => {
+
+  const isDevnet = useWalletStore.getState().isDevnet;
+
+  const RPC =isDevnet
+  ? "https://api.devnet.solana.com"
+  : "https://api.mainnet-beta.solana.com";
+
     const res = await fetch(RPC,{
       method: "POST",
       headers: {"Content-Type": "application/json",},

@@ -24,7 +24,7 @@ export  async function getTokens(address: string) {
     .filter((t:any) => t.amount>0);
 };
 
-export   async function getTxns(address:string) {
+export  async function getTxns(address:string) {
 
   const sigs = await rpc("getSignaturesForAddress" ,[address, {limit :10}]);
 
@@ -46,3 +46,5 @@ export const timeAgo = (ts :number) =>{
   if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
   return `${Math.floor(sec / 86400)}d ago`;
 };
+
+

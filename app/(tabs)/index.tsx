@@ -1,9 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getBalance, getTokens, getTxns, short, timeAgo } from "../../services/methods";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useWalletStore } from "../../src/stores/wallet-store";
+import { FavouriteButton } from "../../src/components/FavouriteButton";
+import { ConnectButton } from "../../src/components/ConnectButton";
+import { useWallet } from "../../src/hooks/useWallet"
 
 export default function WalletScreen() {
 
@@ -13,7 +16,17 @@ export default function WalletScreen() {
   const [tokens, setTokens] = useState<any[]>([]);
   const [txns, setTxns] = useState<any[]>([]);
 
+
+  const addToHistory = useWalletStore((s) => s.addToHistory);
+  const isDevnet = useWalletStore((s) => s.isDevnet);
+  const searchHistory = useWalletStore((s) => s.searchHistory);
+  const wallet = useWallet();
   const router = useRouter();
+
+  const handleSearch = async (address:string) => {
+    addToHistory(address);
+    search()
+  };
 
   const search = async() =>{
     const trimmedAddress = address.trim();
@@ -35,11 +48,57 @@ export default function WalletScreen() {
     setLoading(false);
   };
 
+  const searchFromHistory = (addr: string) => {
+    setAddress(addr);
+    addToHistory(addr);
+    setLoading(true);
+    Promise.all([getBalance(addr), getTokens(addr), getTxns(addr)])
+      .then(([bal, tok, tx]) => {
+        setBalance(bal);
+        setTokens(tok);
+        setTxns(tx);
+      })
+      .catch((e: unknown) => {
+        const message = e instanceof Error ? e.message : "Unknown error";
+        Alert.alert("Error", message);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const clearResults = () => {
+    setAddress("");
+    setBalance(null);
+    setTokens([]);
+    setTxns([]);
+  };
+
   return (
       <ScrollView style={s.container}>
-        <Text style={s.title}>Welcome to SolTrace</Text>
-        <Text style={s.subTitle}>Explore any Solana Wallet</Text>
+
+        <View style={s.Banner}>
+          <Text style={s.title}>SolTrace</Text>
+      
+          <View style={s.bannerRight}>
+            <Text style={s.netText}>{isDevnet? "Devnet": "Mainnet"}</Text>
+          </View>
+        </View>
+
+        <View style={s.subBanner}>
+          <View style={s.subBannerLeft}>
+            <Text style={s.subTitle}>Explore any Solana Wallet</Text>
+          </View>
+          <View style={s.subBannerRight}>
+            <ConnectButton
+            connected={wallet.connected}
+            connecting={wallet.connecting}
+            publicKey={wallet.publicKey?.toBase58() ?? null}
+            onConnect={wallet.connect}
+            onDisconnect={wallet.disconnect}/>
+          </View>
+        </View>
+
         <View style={s.inputContainer}>
+
           <TextInput
             style={s.input}
             placeholder="Enter Solana Wallet Address"
@@ -65,11 +124,35 @@ export default function WalletScreen() {
           )}
         </TouchableOpacity>
 
+        {searchHistory.length > 0 && balance === null &&(
+          <View style={s.historySection}>
+            <Text style={s.historyTitle}>Recent Searches</Text>
+            {searchHistory.slice(0,5).map((addr) => (
+              <TouchableOpacity
+                key={addr}
+                style={s.historyItem}
+                onPress={() => searchFromHistory(addr)}
+                >
+                <Ionicons name="time-outline" size={16} color="#6B7280" />
+                <Text style={s.historyAddress} numberOfLines={1}>
+                  {short(addr, 8)}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         {/* SOL Balance card*/}
         
         {balance !== null && (
           <View style={s.card}>
-            <Text style={s.label}>SOL Balance</Text>
+            <View style={s.favLine}>
+              <Text style={s.label}>SOL Balance</Text>
+              <View style={s.favouriteWrapper}>
+              <FavouriteButton address={address.trim()}/>
+              </View>
+            </View>
             <View style={s.balanceRow}>
               <Text style={s.balance}>{balance.toFixed(4)}</Text>
               <Text style={s.sol}>SOL</Text>
@@ -143,25 +226,21 @@ const s = StyleSheet.create({
   container:{
     flex:1,
     height: "100%",
-    backgroundColor: "#686BEB",
+    backgroundColor: "#6a6af3",
     paddingTop: 60,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   title:{
-    fontSize : 32,
-    paddingTop: 80,
-    paddingLeft: 16,
+    fontSize : 48,
     color:"#ffffff",
     fontWeight: 900,
   },
   subTitle:{
-    paddingTop:14,
-    paddingLeft: 44,
     fontSize: 18,
-    color:"#141F5C",  
+    color:"#141F5C",
   },
   inputContainer:{
-    marginTop:50,
+    marginTop:40,
     backgroundColor: "#171b34",
     borderRadius: 12,
     padding: 16,
@@ -170,13 +249,13 @@ const s = StyleSheet.create({
   },
   input: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 20,
     paddingVertical: 14,
   },
   searchButton:{
     borderRadius:8,
     backgroundColor: "#3abd3a",
-    marginTop:40,
+    marginTop:25,
     height:60,
     alignItems: "center",
     justifyContent: "center",
@@ -203,6 +282,7 @@ const s = StyleSheet.create({
     fontSize: 13,
     textTransform: "uppercase",
     letterSpacing: 1,
+    paddingLeft:60,
   },
   balanceRow: {
     flexDirection: "row",
@@ -269,4 +349,68 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-})
+  bannerRight:{
+    backgroundColor: "#EF4444",
+    paddingHorizontal:10,
+    borderRadius: 16,
+    paddingVertical:3,
+  },
+  netText:{
+    fontSize:20,
+    color: "#FFFFFF",
+    fontWeight:600,
+  },
+  Banner:{
+    flexDirection: "row",
+    alignItems:"center",
+    paddingTop:8,
+    justifyContent:"space-between",
+    paddingLeft:5,
+  },
+  subBanner :{
+    paddingTop:8,
+    paddingLeft:5,
+  },
+  subBannerLeft:{
+
+  },
+  subBannerRight: {
+
+  },
+  favLine:{
+    flexDirection:"row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    width:"100%",
+  },
+  favouriteWrapper:{
+  },
+  historySection: {
+    marginTop: 24,
+  },
+  historyTitle: {
+    color: "#6B7280",
+    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  historyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#16161D",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#2A2A35",
+    gap: 12,
+  },
+  historyAddress: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "monospace",
+  },
+});

@@ -33,7 +33,7 @@ export function FavouriteButton ({address}: Props){
 }
 
 const s = StyleSheet.create({
-  button: {
-    padding:8,
-  },
+  button:{
+    paddingHorizontal:10,
+  }
 });
