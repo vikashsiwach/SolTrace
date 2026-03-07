@@ -63,7 +63,7 @@ const s = StyleSheet.create({
     borderColor: "#9945FF",
   },
   connected: {
-    backgroundColor: "rgba(20, 241, 149, 0.1)",
+    backgroundColor: "#197168",
     borderColor: "#14F195",
   },
   connecting: {
@@ -72,7 +72,7 @@ const s = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "600",
   },
   connectedText: {

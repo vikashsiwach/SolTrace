@@ -26,7 +26,7 @@ export function FavouriteButton ({address}: Props){
       style={s.button}>
       <Ionicons
         name={isFavourite(address) ? "heart" : "heart-outline"} 
-        size={24}
+        size={25}
         color={ isFavourite(address) ? "#FF4545" : "#666"} />
     </TouchableOpacity>
   )

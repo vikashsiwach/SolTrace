@@ -15,8 +15,8 @@ import { useWalletStore } from "../stores/wallet-store";
 import { Buffer } from "buffer"
 
 const APP_IDENTITY = {
-  name: "SolScan",
-  uri: "https://solscan.io",
+  name: "SolTrace",
+  uri: "https://soltrace.io",
   icon: "favicon.ico",
 };
 

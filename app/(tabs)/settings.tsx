@@ -102,7 +102,7 @@ export default function SettingsScreen() {
 const s = StyleSheet.create ({
   safe:{
     flex:1,
-    backgroundColor: "#686BEB",
+    backgroundColor: "#00cdcd",
   },
   scroll:{
     flex:1,

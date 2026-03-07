@@ -92,7 +92,7 @@ export default function SwapScreen() {
 const s = StyleSheet.create({
   container:{
     flex:1,
-    backgroundColor: "#686BEB",
+    backgroundColor: "#00cdcd",
     paddingTop: 30,
     paddingHorizontal: 16,
   },
