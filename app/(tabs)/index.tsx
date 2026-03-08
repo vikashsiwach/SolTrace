@@ -183,6 +183,15 @@ export default function WalletScreen() {
                   <Text style={s.sol}>SOL</Text>
                 </View>
                 <Text style={s.addr}>{short(address.trim(), 6)}</Text>
+                {wallet.connected && (
+                <TouchableOpacity
+                  style={s.sendNav}
+                  onPress={() => router.push("/send")}
+                >
+                  <Ionicons name="paper-plane" size={18} color="#0D0D12" />
+                  <Text style={s.sendNavText}>Send SOL</Text>
+                </TouchableOpacity>
+              )}
               </View>
             )}
           </View>
@@ -258,7 +267,7 @@ const s = StyleSheet.create({
     flex:1,
     height: "100%",
     backgroundColor: "#00cdcd",
-    paddingTop:40,
+    paddingTop:20,
     paddingHorizontal: 12,
   },
   title:{
@@ -285,7 +294,7 @@ const s = StyleSheet.create({
   },
   searchButton:{
     flex: 1,
-    backgroundColor: "#08f291",
+    backgroundColor: "#179217",
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: "center",
@@ -380,7 +389,7 @@ const s = StyleSheet.create({
     gap: 8,
   },
   bannerRight:{
-    backgroundColor: "#3b505e",
+    backgroundColor: "#4945c2",
     paddingHorizontal:10,
     borderRadius: 16,
     paddingVertical:3,
@@ -403,7 +412,7 @@ const s = StyleSheet.create({
   },
   subBanner :{
     paddingLeft:5,
-    paddingTop:8,
+    marginTop:-2,
     alignItems:"center",
     flexDirection: "row",
     justifyContent : "space-between",
@@ -435,7 +444,7 @@ const s = StyleSheet.create({
     marginTop: 24,
   },
   historyTitle: {
-    color: "#6B7280",
+    color: "#141F5C",
     fontSize: 13,
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -459,4 +468,21 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontFamily: "monospace",
   },
+  sendNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#14F195",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 20,
+    gap: 8,
+  },
+  sendNavText: {
+    color: "#0D0D12",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
 });
