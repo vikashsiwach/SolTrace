@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { getBalance, getTokens, getTxns, short, timeAgo } from "../../services/methods";
+import { getBalance, getTokens, getTxns, short, timeAgo } from "../../src/services/methods";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useWalletStore } from "../../src/stores/wallet-store";
@@ -8,6 +8,8 @@ import { FavouriteButton } from "../../src/components/FavouriteButton";
 import { ConnectButton } from "../../src/components/ConnectButton";
 import { useWallet } from "../../src/hooks/useWallet"
 import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { SwipeableHistoryItem } from "../../src/components/SwipeableHistoryItem";
 
 export default function WalletScreen() {
 
@@ -150,28 +152,28 @@ export default function WalletScreen() {
             
 
             {searchHistory.length > 0 && balance === null &&(
-              <View style={s.historySection}>
+              <Animated.View 
+                style={s.historySection}
+                entering ={FadeInDown.delay(100).springify()}>
                 <Text style={s.historyTitle}>Recent Searches</Text>
-                {searchHistory.slice(0,5).map((addr) => (
-                  <TouchableOpacity
-                    key={addr}
-                    style={s.historyItem}
-                    onPress={() => searchFromHistory(addr)}
-                    >
-                    <Ionicons name="time-outline" size={16} color="#6B7280" />
-                    <Text style={s.historyAddress} numberOfLines={1}>
-                      {short(addr, 8)}
-                    </Text>
-                    <Ionicons name="chevron-forward" size={16} color="#6B7280" />
-                  </TouchableOpacity>
+                {searchHistory.slice(0,5).map((addr, index) => (
+                  <SwipeableHistoryItem
+                  key={addr}
+                  address={addr}
+                  index={index}
+                  onPress={() => searchFromHistory(addr)}
+                  onDelete={() => useWalletStore.getState().removeFromHistory(addr)}
+                />
                 ))}
-              </View>
+              </Animated.View>
             )}
 
             {/* SOL Balance card*/}
 
             {balance !== null && (
-              <View style={s.card}>
+              <Animated.View
+                style={s.card}
+                entering={FadeInDown.delay(100).springify()}>
                 <View style={s.favLine}>
                   <Text style={s.label}>SOL Balance</Text>
                   <View>
@@ -192,23 +194,23 @@ export default function WalletScreen() {
                   <Text style={s.sendNavText}>Send SOL</Text>
                 </TouchableOpacity>
               )}
-              </View>
+              </Animated.View>
             )}
           </View>
 
           {tokens.length > 0 && (
-          <>
-            <Text style={s.section}>Tokens ({tokens.length})</Text>
-            <FlatList
-              data={tokens}
-              keyExtractor={(t) => t.mint}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style= {s.row}
-                  onPress ={() =>
-                    router.push(`/token/${item.mint}?amount=${item.amount}`)
-                  }
+            <Animated.View entering={FadeInDown.delay(200).springify()}>
+              <Text style={s.section}>Tokens ({tokens.length})</Text>
+              {tokens.map((item: { mint: string; amount: number }, index: number) => (
+                <Animated.View
+                  key={item.mint}
+                  entering={FadeInDown.delay(250 + index * 50).springify()}
+                >
+                  <TouchableOpacity
+                    style={s.row}
+                    onPress={() =>
+                      router.push(`/token/${item.mint}?amount=${item.amount}`)
+                    }
                   >
                     <Text style={s.mint}>{short(item.mint, 6)}</Text>
                     <View style={s.tokenRight}>
@@ -219,39 +221,45 @@ export default function WalletScreen() {
                         color="#6B7280"
                       />
                     </View>
-                </TouchableOpacity>
-
-              )}
-            />
-          </>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
+            </Animated.View>
         )}
         {txns.length > 0 && (
-          <>
-            <Text style={s.section}>Recent Transactions</Text>
-            <FlatList
-              data={txns}
-              keyExtractor={(t) => t.sig}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={s.row}
-                  onPress={() =>
-                    Linking.openURL(`https://soltrace.io/tx/${item.sig}`)
-                  }
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+              <Text style={s.section}>Recent Transactions</Text>
+              {txns.map((item: { sig: string; time: number; ok: boolean }, index: number) => (
+                <Animated.View
+                  key={item.sig}
+                  entering={FadeInDown.delay(350 + index * 50).springify()}
                 >
-                  <View>
-                    <Text style={s.mint}>{short(item.sig, 8)}</Text>
-                    <Text style={s.time}>
-                      {item.time ? timeAgo(item.time) : "pending"}
+                  <TouchableOpacity
+                    style={s.row}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://solscan.io/tx/${item.sig}${isDevnet ? "?cluster=devnet" : ""}`
+                      )
+                    }
+                  >
+                    <View>
+                      <Text style={s.mint}>{short(item.sig, 8)}</Text>
+                      <Text style={s.time}>
+                        {item.time ? timeAgo(item.time) : "pending"}
+                      </Text>
+                    </View>
+                    <Text
+                      style={{
+                        color: item.ok ? "#14F195" : "#EF4444",
+                        fontSize: 18,
+                      }}
+                    >
+                      {item.ok ? "+" : "-"}
                     </Text>
-                  </View>
-                  <Text style={{ color: item.ok ? "#14F195" : "#EF4444", fontSize: 18 }}>
-                    {item.ok ? "+" : "-"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
+            </Animated.View>
         )}
         </ScrollView>
       </KeyboardAvoidingView>

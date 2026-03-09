@@ -24,8 +24,8 @@ export default function SendScreen() {
     try{
       const sig = await wallet.sendSOL(toAddress.trim(), Number(amount));
       const baseUrl = isDevnet 
-      ? "https://soltrace.io/tx"
-      : "https://soltrace.io/tx";
+      ? "https://solscan.io/tx"
+      : "https://solscan.io/tx";
       
       const clusterParam = isDevnet ? "?cluster=devnet" : "";
       Alert.alert(
@@ -33,7 +33,7 @@ export default function SendScreen() {
         `Sent ${amount} SOL\nSignature : ${sig.slice(0,20)}...`,
         [
           {
-            text : "View on SolTrace",
+            text : "View on SolScan",
             onPress : () => Linking.openURL(`${baseUrl}/${sig}${clusterParam}`),
           },
           {text : "Done", onPress : () => router.back() },

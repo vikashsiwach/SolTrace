@@ -1,4 +1,5 @@
-import { useWalletStore } from "../src/stores/wallet-store";
+import { useWalletStore } from "../stores/wallet-store";
+
 
 
 export const rpc = async (method: string, params: any[]) => {
