@@ -15,6 +15,9 @@ It is built for fast wallet inspection with a mobile-first UI and persistent loc
 - Keep recent searches with swipe-to-delete history
 - Persist app data locally with MMKV + Zustand
 
+## Demo Video
+https://github.com/user-attachments/assets/34142521-962c-4be1-895d-ceb612e878e5
+
 ## Tech Stack
 
 - Expo Router
@@ -163,4 +166,4 @@ SolTrace combines wallet exploration, lightweight portfolio checking, transactio
 
 ## License
 
-This project is private unless you choose to add a license.
+This project is private.
